@@ -3,7 +3,7 @@ fn score(a: char, b: char) -> u32 {
         'x' => 1,
         'y' => 2,
         'z' => 3,
-        _ => panic!("Unexpected input {}", b)
+        _ => panic!("Unexpected input {}", b),
     };
 
     let outcome = match (a, b) {
@@ -16,7 +16,7 @@ fn score(a: char, b: char) -> u32 {
         ('c', 'x') => 6,
         ('c', 'y') => 0,
         ('c', 'z') => 3,
-        _ => panic!("Unexpected combination ({}, {})", a, b)
+        _ => panic!("Unexpected combination ({}, {})", a, b),
     };
 
     choice + outcome
@@ -33,28 +33,36 @@ fn choose(a: char, b: char) -> char {
         ('c', 'x') => 'y',
         ('c', 'y') => 'z',
         ('c', 'z') => 'x',
-        _ => panic!("Unexpected combination ({}, {})", a, b)
+        _ => panic!("Unexpected combination ({}, {})", a, b),
     }
 }
 
 pub fn part_one(input: &str) -> Option<u32> {
-    let total = input.to_lowercase().lines().map(|l| {
-        let mut chars = l.chars();
-        let a = chars.nth(0).expect("Expected a char at position 0");
-        let b = chars.nth(1).expect("Expected a char at position 1");
-        score(a, b)
-    }).sum::<u32>();
+    let total = input
+        .to_lowercase()
+        .lines()
+        .map(|l| {
+            let mut chars = l.chars();
+            let a = chars.nth(0).expect("Expected a char at position 0");
+            let b = chars.nth(1).expect("Expected a char at position 1");
+            score(a, b)
+        })
+        .sum::<u32>();
 
     Some(total)
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    let total = input.to_lowercase().lines().map(|l| {
-        let mut chars = l.chars();
-        let a = chars.nth(0).expect("Expected a char at position 0");
-        let b = chars.nth(1).expect("Expected a char at position 1");
-        score(a, choose(a, b))
-    }).sum::<u32>();
+    let total = input
+        .to_lowercase()
+        .lines()
+        .map(|l| {
+            let mut chars = l.chars();
+            let a = chars.nth(0).expect("Expected a char at position 0");
+            let b = chars.nth(1).expect("Expected a char at position 1");
+            score(a, choose(a, b))
+        })
+        .sum::<u32>();
 
     Some(total)
 }
