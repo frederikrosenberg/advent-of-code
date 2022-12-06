@@ -17,8 +17,7 @@ pub fn part_one(input: &str) -> Option<u32> {
             let second = line[count / 2..].chars().collect_vec();
             let result: &char = first
                 .iter()
-                .filter(|c| second.contains(c))
-                .next()
+                .find(|c| second.contains(c))
                 .expect("Expected at least one char");
             to_number(result)
         })
@@ -52,8 +51,7 @@ pub fn part_two(input: &str) -> Option<u32> {
             let common: &char = first
                 .iter()
                 .filter(|c| second.contains(c))
-                .filter(|c| third.contains(c))
-                .next()
+                .find(|c| third.contains(c))
                 .expect("Expected at least one char");
 
             to_number(common)

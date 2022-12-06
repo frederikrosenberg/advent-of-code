@@ -43,7 +43,7 @@ pub fn part_one(input: &str) -> Option<u32> {
         .lines()
         .map(|l| {
             let mut chars = l.chars();
-            let a = chars.nth(0).expect("Expected a char at position 0");
+            let a = chars.next().expect("Expected a char");
             let b = chars.nth(1).expect("Expected a char at position 1");
             score(a, b)
         })
@@ -58,7 +58,7 @@ pub fn part_two(input: &str) -> Option<u32> {
         .lines()
         .map(|l| {
             let mut chars = l.chars();
-            let a = chars.nth(0).expect("Expected a char at position 0");
+            let a = chars.next().expect("Expected a char");
             let b = chars.nth(1).expect("Expected a char at position 1");
             score(a, choose(a, b))
         })

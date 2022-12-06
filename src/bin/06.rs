@@ -3,7 +3,7 @@ use itertools::Itertools;
 fn _find_next(input: &str, distinct: usize) -> u32 {
     let mut position = 0;
     for (index, value) in input.chars().collect_vec().windows(distinct).enumerate() {
-        if value.into_iter().unique().count() == distinct {
+        if value.iter().unique().count() == distinct {
             position = index + distinct;
             break;
         }

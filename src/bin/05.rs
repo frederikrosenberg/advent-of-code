@@ -24,8 +24,8 @@ fn parse_initial<'a>(lines: impl Iterator<Item = &'a str>) -> Vec<String> {
                 } else {
                     result.push(c.to_string())
                 }
-            } else if let None = result.get(index) {
-                    result.push(String::new());
+            } else if result.get(index).is_none() {
+                result.push(String::new());
             }
 
             index += 1;
@@ -33,7 +33,6 @@ fn parse_initial<'a>(lines: impl Iterator<Item = &'a str>) -> Vec<String> {
     }
     result
 }
-
 
 pub fn part_one(input: &str) -> Option<String> {
     let mut lines = input.lines();
@@ -50,13 +49,13 @@ pub fn part_one(input: &str) -> Option<String> {
             for _ in 0..count.parse().unwrap() {
                 to_move.insert(0, from_stack.remove(0));
             }
-        
+
             let to_stack = initial.get_mut(to.parse::<usize>().unwrap() - 1).unwrap();
             to_stack.insert_str(0, &to_move);
         }
     }
 
-    let result = initial.iter().map(|s| s.chars().nth(0).unwrap()).join("");
+    let result = initial.iter().map(|s| s.chars().next().unwrap()).join("");
 
     Some(result)
 }
@@ -76,13 +75,13 @@ pub fn part_two(input: &str) -> Option<String> {
             for _ in 0..count.parse().unwrap() {
                 to_move.push(from_stack.remove(0));
             }
-        
+
             let to_stack = initial.get_mut(to.parse::<usize>().unwrap() - 1).unwrap();
             to_stack.insert_str(0, &to_move);
         }
     }
 
-    let result = initial.iter().map(|s| s.chars().nth(0).unwrap()).join("");
+    let result = initial.iter().map(|s| s.chars().next().unwrap()).join("");
 
     Some(result)
 }
