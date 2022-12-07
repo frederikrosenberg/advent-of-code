@@ -9,13 +9,13 @@ impl Section {
     }
 
     fn contains(&self, other: &Section) -> bool {
-        self.lower <= other.lower && self.higher >= other.higher ||
-        self.lower >= other.lower && self.higher <= other.higher
+        self.lower <= other.lower && self.higher >= other.higher
+            || self.lower >= other.lower && self.higher <= other.higher
     }
 
     fn overlaps(&self, other: &Section) -> bool {
-        self.lower <= other.lower && other.lower <= self.higher ||
-        other.lower <= self.lower && self.lower <= other.higher 
+        self.lower <= other.lower && other.lower <= self.higher
+            || other.lower <= self.lower && self.lower <= other.higher
     }
 
     fn parse(line: &str) -> (Section, Section) {
