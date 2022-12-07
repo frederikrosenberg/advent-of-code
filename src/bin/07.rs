@@ -23,7 +23,7 @@ impl Iterator for FileSystemIter<'_> {
     fn next(&mut self) -> Option<Self::Item> {
         let mut result = None;
 
-        while let Some(line) = self.lines.next() {
+        for line in self.lines.by_ref() {
             match line {
                 "$ ls" => {}
                 "$ cd .." => {
