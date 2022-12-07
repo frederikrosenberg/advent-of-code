@@ -1,70 +1,79 @@
+use itertools::Itertools;
+use std::str::Lines;
+
+struct FileSystemIter<'a> {
+    lines: Lines<'a>,
+    stack: Vec<u32>,
+    current: u32,
+}
+
+impl<'a> FileSystemIter<'a> {
+    fn new(lines: Lines<'a>) -> FileSystemIter {
+        FileSystemIter {
+            lines,
+            stack: Vec::new(),
+            current: 0,
+        }
+    }
+}
+
+impl Iterator for FileSystemIter<'_> {
+    type Item = u32;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let mut result = None;
+
+        while let Some(line) = self.lines.next() {
+            match line {
+                "$ ls" => {}
+                "$ cd .." => {
+                    result = Some(self.current);
+                    self.current += self.stack.pop().unwrap();
+                    break;
+                }
+                s if s.starts_with("$ cd ") => {
+                    self.stack.push(self.current);
+                    self.current = 0;
+                }
+                s if s.starts_with("dir") => {}
+                _ => {
+                    self.current += line
+                        .split_whitespace()
+                        .next()
+                        .unwrap()
+                        .parse::<u32>()
+                        .unwrap();
+                }
+            }
+        }
+
+        // No need to return the last current since the stack 
+        // contains an 0 from the root folder
+        if result.is_none() && !self.stack.is_empty() {
+            result = Some(self.current);
+            self.current += self.stack.pop().unwrap();
+        }
+
+        result
+    }
+}
 
 pub fn part_one(input: &str) -> Option<u32> {
-    let mut stack: Vec<u32> = Vec::new();
-    let mut total: u32 = 0;
-    let mut current: u32 = 0; 
+    let result = FileSystemIter::new(input.lines())
+        .filter(|s| *s < 100_000)
+        .sum();
 
-    for line in input.lines().skip(1) {
-        match line {
-            "$ ls" => {}
-            "$ cd .." => {
-                if current < 100000 {
-                    total += current;
-                }
-                current += stack.pop().unwrap();
-            }
-            s if s.starts_with("$ cd ") => {
-                stack.push(current);
-                current = 0;
-            }
-            s if s.starts_with("dir") => {}
-            _ => {
-                current += line.split_whitespace().next().unwrap().parse::<u32>().unwrap();
-            }
-        }
-    }
-
-    while !stack.is_empty() {
-        if current < 100000 {
-            total += current;
-        }
-        current += stack.pop().unwrap();
-    }
-
-    Some(total)
+    Some(result)
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    let mut stack: Vec<u32> = Vec::new();
-    let mut sizes: Vec<u32> = Vec::new();
-    let mut current: u32 = 0; 
+    let fs = FileSystemIter::new(input.lines()).collect_vec();
+    let total = fs.last().unwrap();
+    let missing = 30_000_000 - (70_000_000 - total);
 
-    for line in input.lines().skip(1) {
-        match line {
-            "$ ls" => {}
-            "$ cd .." => {
-                sizes.push(current);
-                current += stack.pop().unwrap();
-            }
-            s if s.starts_with("$ cd ") => {
-                stack.push(current);
-                current = 0;
-            }
-            s if s.starts_with("dir") => {}
-            _ => {
-                current += line.split_whitespace().next().unwrap().parse::<u32>().unwrap();
-            }
-        }
-    }
-
-    while !stack.is_empty() {
-        sizes.push(current);
-        current += stack.pop().unwrap();
-    }
-
-    let missing = 30_000_000 - (70_000_000 - current);
-
-    sizes.into_iter().filter(|s| s > &missing).min_by_key(|s| s.abs_diff(missing))
+    fs.into_iter()
+        .filter(|s| s > &missing)
+        .min_by_key(|s| s.abs_diff(missing))
 }
 
 fn main() {
