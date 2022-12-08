@@ -47,7 +47,7 @@ impl Iterator for FileSystemIter<'_> {
             }
         }
 
-        // No need to return the last current since the stack 
+        // No need to return the last current since the stack
         // contains an 0 from the root folder
         if result.is_none() && !self.stack.is_empty() {
             result = Some(self.current);
