@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use itertools::Itertools;
 
 enum Direction {
     Up,
@@ -7,7 +7,7 @@ enum Direction {
     Left,
 }
 
-#[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
+#[derive(PartialEq, Eq, Clone, Copy, Debug)]
 struct Position {
     x: i32,
     y: i32,
@@ -89,6 +89,10 @@ impl Position {
 
         true
     }
+
+    fn hash(&self) -> i32 {
+        self.x * 10_000 + self.y
+    }
 }
 
 impl Move {
@@ -113,20 +117,20 @@ impl Move {
 
 fn solve(input: &str, size: usize) -> Option<u32> {
     let mut rope = Rope::new(size);
-    let mut set = HashSet::new();
-    set.insert(*rope.tail());
+    let mut set = Vec::new();
+    set.push(rope.tail().hash());
 
     for line in input.lines() {
         let m = Move::from_line(line);
 
         for _ in 0..m.times {
             if rope.move_dir(&m.direction) {
-                set.insert(*rope.tail());
+                set.push(rope.tail().hash());
             }
         }
     }
 
-    Some(set.len() as u32)
+    Some(set.into_iter().unique().count() as u32)
 }
 
 pub fn part_one(input: &str) -> Option<u32> {
