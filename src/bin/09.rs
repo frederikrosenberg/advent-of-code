@@ -20,7 +20,7 @@ struct Move {
 
 struct Rope {
     knots: Vec<Position>,
-    size: usize
+    size: usize,
 }
 
 impl Rope {
@@ -45,7 +45,7 @@ impl Rope {
             if !tail.move_to(&head) {
                 break;
             }
-            
+
             if i == self.size - 1 {
                 return true;
             }
@@ -104,8 +104,8 @@ impl Move {
             "U" => Direction::Up,
             "D" => Direction::Down,
             "L" => Direction::Left,
-            "R" => Direction::Right, 
-            _ => unreachable!()
+            "R" => Direction::Right,
+            _ => unreachable!(),
         };
 
         Move {
