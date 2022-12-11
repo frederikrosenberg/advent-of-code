@@ -1,4 +1,4 @@
-use std::collections::VecDeque;
+use std::{collections::VecDeque, slice::from_raw_parts_mut};
 
 use itertools::Itertools;
 
@@ -66,10 +66,7 @@ impl Monkey {
         }
     }
 
-    fn round(&mut self, modulus: Option<u64>) -> (Vec<u64>, Vec<u64>) {
-        let mut t = Vec::new();
-        let mut f = Vec::new();
-
+    fn round(&mut self, t_monkey: &mut Monkey, f_monkey: &mut Monkey, modulus: Option<u64>) {
         while let Some(mut item) = self.items.pop_front() {
             self.inspected += 1;
             if let Some(val) = self.operation_const {
@@ -85,13 +82,32 @@ impl Monkey {
             }
 
             if item % self.test_div_by == 0 {
-                t.push(item);
+                t_monkey.items.push_back(item);
             } else {
-                f.push(item);
+                f_monkey.items.push_back(item);
             }
         }
+    }
+}
 
-        (t, f)
+#[inline]
+fn get_monkeys(
+    monkeyes: &mut Vec<Monkey>,
+    index: usize,
+) -> (&mut Monkey, &mut Monkey, &mut Monkey) {
+    unsafe {
+        assert!(index < monkeyes.len());
+
+        let monkey = &mut from_raw_parts_mut(monkeyes.as_mut_ptr().add(index), 1)[0];
+        assert!(monkey.test_true < monkeyes.len());
+        assert!(monkey.test_false < monkeyes.len());
+        assert!(monkey.test_true != index);
+        assert!(monkey.test_false != index);
+        assert!(monkey.test_true != monkey.test_false);
+        let t_monkey = &mut from_raw_parts_mut(monkeyes.as_mut_ptr().add(monkey.test_true), 1)[0];
+        let f_monkey = &mut from_raw_parts_mut(monkeyes.as_mut_ptr().add(monkey.test_false), 1)[0];
+
+        (monkey, t_monkey, f_monkey)
     }
 }
 
@@ -110,20 +126,9 @@ fn solve(input: &str, rounds: u64, is_part_two: bool) -> Option<u64> {
 
     for _round in 0..rounds {
         for i in 0..monkeyes.len() {
-            let monkey = &mut monkeyes[i];
-            let t_index = monkey.test_true;
-            let f_index = monkey.test_false;
-            let (t, f) = monkey.round(modulus);
+            let (monkey, t_monkey, f_monkey) = get_monkeys(&mut monkeyes, i);
 
-            let monkey = &mut monkeyes[t_index];
-            for item in t {
-                monkey.items.push_back(item);
-            }
-
-            let monkey = &mut monkeyes[f_index];
-            for item in f {
-                monkey.items.push_back(item);
-            }
+            monkey.round(t_monkey, f_monkey, modulus);
         }
     }
 
