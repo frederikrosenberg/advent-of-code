@@ -48,6 +48,10 @@ impl Map {
         if !is_part_one {
             width += 500;
             x_offset -= 250;
+        } else {
+            width += 2;
+            x_offset -= 1;
+
         }
 
         let height = y_max + 3;
