@@ -142,8 +142,7 @@ fn solve_part_two(input: &str, max_size: u32) -> Option<usize> {
 
     let mut points = scans
         .iter()
-        .flat_map(|s| s.edge_points(&min, &max))
-        .duplicates();
+        .flat_map(|s| s.edge_points(&min, &max));
 
     let point = points
         .find(|p| scans.iter().all(|s| s.is_outside(p))).unwrap();
