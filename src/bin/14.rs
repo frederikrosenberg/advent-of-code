@@ -51,7 +51,6 @@ impl Map {
         } else {
             width += 2;
             x_offset -= 1;
-
         }
 
         let height = y_max + 3;

@@ -43,10 +43,6 @@ impl Scan {
         }
     }
 
-    fn is_within(&self, point: &Point) -> bool {
-        self.sensor.manhattan_distance(point) <= self.distance
-    }
-
     fn is_outside(&self, point: &Point) -> bool {
         self.sensor.manhattan_distance(point) > self.distance
     }
@@ -55,21 +51,25 @@ impl Scan {
         let start_y = self.sensor.y - self.distance - 1;
         let end_y = self.sensor.y + self.distance + 1;
 
+        if end_y < min.y || start_y > max.y {
+            return Vec::new();
+        }
+
         let o_start_y = start_y.max(min.y);
         let o_end_y = end_y.min(max.y);
         let mut offset = 0;
 
         if start_y != o_start_y {
             if o_start_y <= self.sensor.y {
-                offset = o_start_y - start_y + 1;
+                offset = o_start_y - start_y;
             } else {
-                offset = o_end_y - o_start_y;
+                offset = self.distance + 1 - (o_end_y - self.sensor.y) as i32;
             }
         }
 
         let mut points = vec![];
 
-        for y in start_y..=end_y {
+        for y in o_start_y..=o_end_y {
             if min.y <= y && max.y >= y {
                 if offset == 0 {
                     if min.x <= self.sensor.x && max.x >= self.sensor.x {
@@ -81,11 +81,11 @@ impl Scan {
                 } else {
                     let x_1 = self.sensor.x + offset;
                     let x_2 = self.sensor.x - offset;
-                    if min.x <= x_1 && max.x >= x_1 {
-                        points.push(Point { x: x_1, y });
-                    }
                     if min.x <= x_2 && max.x >= x_2 {
                         points.push(Point { x: x_2, y });
+                    }
+                    if min.x <= x_1 && max.x >= x_1 {
+                        points.push(Point { x: x_1, y });
                     }
                 }
             }
@@ -115,19 +115,21 @@ fn solve_part_one(input: &str, y: i32) -> Option<usize> {
         .max()
         .unwrap();
 
-    let mut count = (min_x..=max_x)
-        .map(|x| Point { x, y })
-        .filter(|p| scans.iter().any(|s| s.is_within(p)))
-        .count();
+    let min = Point { x: min_x - 1, y };
+    let max = Point { x: max_x + 1, y };
 
-    count -= scans
+    let pairs = scans
         .iter()
-        .map(|s| &s.beacon)
-        .filter(|b| b.y == y)
-        .unique()
-        .count();
+        .map(|s| s.edge_points(&min, &max))
+        .filter(|p| p.len() == 2)
+        .flat_map(|p| vec![p[0].x + 1, p[1].x - 1])
+        .minmax();
 
-    Some(count)
+    if let itertools::MinMaxResult::MinMax(min, max) = pairs {
+        return Some((max - min) as usize);
+    }
+
+    None
 }
 
 fn solve_part_two(input: &str, max_size: u32) -> Option<usize> {
@@ -140,12 +142,11 @@ fn solve_part_two(input: &str, max_size: u32) -> Option<usize> {
         y: max_size as i32,
     };
 
-    let mut points = scans
-        .iter()
-        .flat_map(|s| s.edge_points(&min, &max));
+    let mut points = scans.iter().flat_map(|s| s.edge_points(&min, &max));
 
     let point = points
-        .find(|p| scans.iter().all(|s| s.is_outside(p))).unwrap();
+        .find(|p| scans.iter().all(|s| s.is_outside(p)))
+        .unwrap();
 
     Some(point.x as usize * WIDTH + point.y as usize)
 }
