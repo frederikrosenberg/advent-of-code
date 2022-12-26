@@ -9,18 +9,18 @@ fn move_number_faster(file: &mut Vec<(usize, i64)>, (index, number): (usize, i64
     let new = actual_index + number;
 
     //if new >= len || new < 0 {
-        let rotate = ((new.abs() / len) % len) as usize; 
-        /*
-        if rotate == 0 {
-            rotate += 1;
-        }
-        */
-        //println!("Rotating: {}", rotate);
-        if new > 0 {
-            file.rotate_left(rotate);
-        } else {
-            file.rotate_right(rotate);
-        }
+    let rotate = ((new.abs() / len) % len) as usize;
+    /*
+    if rotate == 0 {
+        rotate += 1;
+    }
+    */
+    //println!("Rotating: {}", rotate);
+    if new > 0 {
+        file.rotate_left(rotate);
+    } else {
+        file.rotate_right(rotate);
+    }
     //}
     let actual_index = file.iter().position(|&n| n.0 == index).unwrap() as i64;
     file.remove(actual_index as usize);
@@ -29,8 +29,6 @@ fn move_number_faster(file: &mut Vec<(usize, i64)>, (index, number): (usize, i64
     file.insert(new_position as usize, (index, number));
 }
 
-
-
 fn move_number(file: &mut Vec<(usize, i64)>, (index, number): (usize, i64)) {
     if number == 0 {
         return;
@@ -38,19 +36,24 @@ fn move_number(file: &mut Vec<(usize, i64)>, (index, number): (usize, i64)) {
 
     let len = file.len() as i64;
 
-    
     let mut actual_index = file.iter().position(|&n| n.0 == index).unwrap() as i64;
 
     let new_position = actual_index + number;
 
     if new_position < actual_index {
         while actual_index != new_position {
-            file.swap(((actual_index - 1).rem_euclid(len)) as usize, (actual_index.rem_euclid(len)) as usize);
+            file.swap(
+                ((actual_index - 1).rem_euclid(len)) as usize,
+                (actual_index.rem_euclid(len)) as usize,
+            );
             actual_index -= 1;
         }
     } else {
         while actual_index != new_position {
-            file.swap(((actual_index).rem_euclid(len)) as usize, ((actual_index + 1).rem_euclid(len)) as usize);
+            file.swap(
+                ((actual_index).rem_euclid(len)) as usize,
+                ((actual_index + 1).rem_euclid(len)) as usize,
+            );
             actual_index += 1;
         }
     }
@@ -80,7 +83,11 @@ pub fn part_one(input: &str) -> Option<i64> {
 }
 
 pub fn part_two(input: &str) -> Option<i64> {
-    let order: Vec<i64> = input.lines().filter_map(|l| l.parse().ok()).map(|n: i64| n * 811589153).collect_vec();
+    let order: Vec<i64> = input
+        .lines()
+        .filter_map(|l| l.parse().ok())
+        .map(|n: i64| n * 811589153)
+        .collect_vec();
     let mut file = order.clone().into_iter().enumerate().collect_vec();
     println!("Initial array is {:?}", file);
 
@@ -88,7 +95,11 @@ pub fn part_two(input: &str) -> Option<i64> {
         for (index, number) in order.iter().enumerate() {
             move_number_faster(&mut file, (index, *number));
         }
-        println!("After round {}, array is {:?}", _round, file.iter().map(|f| f.1).collect_vec());
+        println!(
+            "After round {}, array is {:?}",
+            _round,
+            file.iter().map(|f| f.1).collect_vec()
+        );
     }
 
     let index = file.iter().position(|&n| n.1 == 0).unwrap();
@@ -135,7 +146,6 @@ mod tests {
 
             assert_eq!(file, expected, "After {} array should be:", pair.1);
         }
-
     }
 
     #[test]
@@ -145,8 +155,7 @@ mod tests {
 
         move_number(&mut file, (2, 4));
         move_number_faster(&mut actual, (2, 4));
-        assert_eq!(file,actual);
-
+        assert_eq!(file, actual);
     }
 
     #[test]
