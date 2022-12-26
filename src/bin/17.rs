@@ -217,7 +217,7 @@ impl<const WIDTH: usize> Board<WIDTH> {
         shape.place_in_board(&position, self);
 
         if let Some(max) = self.max_shape_position {
-            if max < position.y as usize {
+            if max < position.y {
                 self.max_shape_position = Some(position.y);
             }
         } else {
@@ -270,7 +270,7 @@ pub fn part_two(input: &str) -> Option<usize> {
 
     let mut board = Board::<7>::new();
 
-    for i in 0..to as usize {
+    for i in 0..to {
         let shape = shapes_iter.next().unwrap();
         board.place_shape(shape, &mut winds_iter);
         if let Some(max) = board.max_shape_position {

@@ -55,9 +55,9 @@ impl Map {
 
         let height = y_max + 3;
 
-        let mut map = vec![Type::None; (width * height) as usize];
+        let mut map = vec![Type::None; width * height];
 
-        let index = |x, y| ((x - x_offset) + y * width) as usize;
+        let index = |x, y| ((x - x_offset) + y * width);
 
         for rock in rocks.iter() {
             for (start, end) in rock.points.iter().tuple_windows() {
@@ -140,7 +140,7 @@ impl Map {
 
 impl Display for Map {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let index = |x, y| (x + y * self.width) as usize;
+        let index = |x, y| (x + y * self.width);
 
         writeln!(f)?;
 

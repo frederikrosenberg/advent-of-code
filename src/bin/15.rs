@@ -63,7 +63,7 @@ impl Scan {
             if o_start_y <= self.sensor.y {
                 offset = o_start_y - start_y;
             } else {
-                offset = self.distance + 1 - (o_end_y - self.sensor.y) as i32;
+                offset = self.distance + 1 - (o_end_y - self.sensor.y);
             }
         }
 

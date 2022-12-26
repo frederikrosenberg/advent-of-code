@@ -40,7 +40,7 @@ impl Map {
     }
 
     fn index(&self, x: usize, y: usize) -> usize {
-        x as usize + y as usize * self.width
+        x + y * self.width
     }
 
     fn position(&self, index: usize) -> (usize, usize) {

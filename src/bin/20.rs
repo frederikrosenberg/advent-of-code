@@ -29,7 +29,7 @@ fn move_number_faster(file: &mut Vec<(usize, i64)>, (index, number): (usize, i64
     file.insert(new_position as usize, (index, number));
 }
 
-fn move_number(file: &mut Vec<(usize, i64)>, (index, number): (usize, i64)) {
+fn _move_number(file: &mut Vec<(usize, i64)>, (index, number): (usize, i64)) {
     if number == 0 {
         return;
     }
@@ -141,7 +141,7 @@ mod tests {
         let mut expected = file.clone();
 
         for pair in order.into_iter().enumerate() {
-            move_number(&mut expected, pair);
+            _move_number(&mut expected, pair);
             move_number_faster(&mut file, pair);
 
             assert_eq!(file, expected, "After {} array should be:", pair.1);
@@ -153,7 +153,7 @@ mod tests {
         let mut file = vec![(0, 1), (1, 2), (2, 4), (3, 3)];
         let mut actual = file.clone();
 
-        move_number(&mut file, (2, 4));
+        _move_number(&mut file, (2, 4));
         move_number_faster(&mut actual, (2, 4));
         assert_eq!(file, actual);
     }
@@ -163,7 +163,7 @@ mod tests {
         let mut file = vec![(0, 4), (1, 5), (2, -1), (3, 6), (4, 7), (5, 8), (6, 50)];
         let mut file_actual = file.clone();
         // (6 + 9) % 7
-        move_number(&mut file, (6, 50));
+        _move_number(&mut file, (6, 50));
         move_number_faster(&mut file_actual, (6, 50));
         assert_eq!(file, file_actual);
     }
