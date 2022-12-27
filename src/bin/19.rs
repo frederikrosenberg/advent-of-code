@@ -78,13 +78,6 @@ impl State<'_> {
     fn get_actions(&self) -> impl Iterator<Item = Action> {
         let mut actions = vec![];
 
-        if self.blueprint.geode_robot_cost.0 <= self.ore
-            && self.blueprint.geode_robot_cost.1 <= self.obsidian
-        {
-            actions.push(Action::Geode);
-            return actions.into_iter();
-        }
-
         if self.blueprint.ore_robot_cost <= self.ore {
             actions.push(Action::Ore);
         }
@@ -97,6 +90,12 @@ impl State<'_> {
             && self.blueprint.obsidian_robot_cost.1 <= self.clay
         {
             actions.push(Action::Obsidian);
+        }
+
+        if self.blueprint.geode_robot_cost.0 <= self.ore
+            && self.blueprint.geode_robot_cost.1 <= self.obsidian
+        {
+            actions.push(Action::Geode);
         }
 
         actions.push(Action::Wait);
@@ -163,7 +162,11 @@ impl State<'_> {
     }
 }
 
-fn simulate<'a, const MAX: u32>(state: &mut State<'a>, cache: &mut HashMap<State<'a>, u32>) -> u32 {
+fn simulate<'a, const MAX: u32>(
+    state: &mut State<'a>,
+    cache: &mut HashMap<State<'a>, u32>,
+    max_seen: &mut HashMap<u32, u32>,
+) -> u32 {
     if state.minute == MAX {
         return state.geode;
     }
@@ -172,15 +175,28 @@ fn simulate<'a, const MAX: u32>(state: &mut State<'a>, cache: &mut HashMap<State
         return cache[state];
     }
 
+    if let Some(max) = max_seen.get(&state.minute) {
+        if *max > state.geode {
+            return 0;
+        }
+    }
+
     let mut max = 0;
 
     for action in state.get_actions() {
-        //println!("state {:?}, action: {:?}", state, action);
         state.apply(&action);
 
-        let result = simulate::<MAX>(state, cache);
+        let result = simulate::<MAX>(state, cache, max_seen);
         if result > max {
             max = result;
+        }
+
+        if let Some(old_max) = max_seen.get_mut(&state.minute) {
+            if *old_max < state.geode {
+                *old_max = state.geode;
+            }
+        } else if state.geode != 0 {
+            max_seen.insert(state.minute, state.geode);
         }
 
         state.unapply(&action);
@@ -201,14 +217,14 @@ pub fn part_one(input: &str) -> Option<u32> {
     for blueprint in blueprints.into_iter() {
         let handle = thread::spawn(move || {
             let mut state = State::new(&blueprint);
-            let result = simulate::<24>(&mut state, &mut HashMap::new());
+            let seen = &mut HashMap::new();
+            let result = simulate::<24>(&mut state, &mut HashMap::new(), seen);
             blueprint.number * result
         });
         threads.push(handle);
     }
 
-    for (index, thread) in threads.into_iter().enumerate() {
-        println!("Waiting for {}", index);
+    for thread in threads.into_iter() {
         score += thread.join().unwrap();
     }
 
@@ -222,21 +238,25 @@ pub fn part_two(input: &str) -> Option<u32> {
         .take(3)
         .collect_vec();
 
-    let mut score = 0;
+    let mut score = 1;
 
     let mut threads = Vec::new();
 
     for blueprint in blueprints.into_iter() {
         let handle = thread::spawn(move || {
             let mut state = State::new(&blueprint);
-            simulate::<32>(&mut state, &mut HashMap::new())
+            let seen = &mut HashMap::new();
+            let result = simulate::<32>(&mut state, &mut HashMap::new(), seen);
+            println!("Seen: {:?}", seen);
+            result
         });
         threads.push(handle);
     }
 
-    for (index, thread) in threads.into_iter().enumerate() {
-        println!("Waiting for {}", index);
-        score *= thread.join().unwrap();
+    for thread in threads.into_iter() {
+        let result = thread.join().unwrap();
+        println!("{}", result);
+        score *= result;
     }
 
     Some(score)
@@ -250,7 +270,6 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
-    /*
     use super::*;
 
     #[test]
@@ -259,6 +278,7 @@ mod tests {
         assert_eq!(part_one(&input), Some(33));
     }
 
+    /* My solution is not entirely correct since this fails:
     #[test]
     fn test_part_two() {
         let input = advent_of_code::read_file("examples", 19);
