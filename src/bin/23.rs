@@ -180,8 +180,6 @@ pub fn part_two(input: &str) -> Option<u32> {
         Direction::East,
     ];
 
-    let mut move_map: HashMap<(i32, i32), Vec<(i32, i32)>> = HashMap::new();
-    move_map.insert((0, 0), vec![]);
     let mut round = 1;
 
     while !do_round(&mut crater, &mut order) {
